@@ -19,6 +19,8 @@ import { Textarea } from '../ui/textarea';
 import { UserValidation } from '@/lib/validations/user';
 import { ChangeEvent, useState } from 'react';
 import { useUploadThing } from '@/lib/uploadthing';
+import { updateUser } from '@/lib/actions/user.actions';
+import { usePathname, useRouter } from 'next/navigation';
 interface AccountProfileProps {
   user: {
     id: string;
@@ -35,15 +37,17 @@ const AccountProfile = ({ user, btnTitle }: AccountProfileProps) => {
   const [files, setFiles] = useState<File[]>([]);
   const { startUpload, permittedFileInfo } = useUploadThing('media', {
     onClientUploadComplete: () => {
-      alert('uploaded successfully!');
+      console.log('uploaded successfully!');
     },
     onUploadError: () => {
-      alert('error occurred while uploading');
+      console.log('error occurred while uploading');
     },
     onUploadBegin: () => {
-      alert('upload has begun');
+      console.log('upload has begun');
     },
   });
+  const pathname = usePathname();
+  const router = useRouter();
   const form = useForm({
     resolver: zodResolver(UserValidation),
     defaultValues: {
@@ -81,7 +85,21 @@ const AccountProfile = ({ user, btnTitle }: AccountProfileProps) => {
         values.profile_photo = imgRes[0].url;
       }
     }
-    //TODO:update user profile
+
+    await updateUser({
+      userId: user.id,
+      username: values.username,
+      name: values.name,
+      bio: values.bio,
+      image: values.profile_photo,
+
+      path: pathname,
+    });
+    if (pathname === '/profile/edit') {
+      router.back();
+    } else {
+      router.push('/');
+    }
   };
 
   console.log({ user });
@@ -125,6 +143,7 @@ const AccountProfile = ({ user, btnTitle }: AccountProfileProps) => {
                   onChange={(e) => handleImage(e, field.onChange)}
                 />
               </FormControl>
+              <FormMessage />
             </FormItem>
           )}
         />
@@ -154,6 +173,7 @@ const AccountProfile = ({ user, btnTitle }: AccountProfileProps) => {
               <FormControl>
                 <Input className="account-form_input" {...field} type="text" />
               </FormControl>
+              <FormMessage />
             </FormItem>
           )}
         />
@@ -172,6 +192,7 @@ const AccountProfile = ({ user, btnTitle }: AccountProfileProps) => {
                   {...field}
                 />
               </FormControl>
+              <FormMessage />
             </FormItem>
           )}
         />
