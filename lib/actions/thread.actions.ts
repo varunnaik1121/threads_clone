@@ -86,3 +86,27 @@ export async function fetchThreadById(id:string){
     }
 
 }
+
+
+export async function addCommentToThread(threadId:string,commentText:string,userId:string,path:string){
+    connectToDB();
+    try{
+        //find the original thread
+        const originalThread=await Thread.findById(threadId);
+        if(!originalThread){
+            throw new Error('Thread not found');
+        }
+        const commentThread=new Thread({
+            text:commentText,
+            author:userId,
+            parentId:threadId,
+        })
+
+        
+        
+
+
+    }catch(err:any){
+        throw new Error("error adding comment")
+    }
+}
